@@ -11,80 +11,111 @@
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/day_background"
         tools:context=".MainActivity">
-
-        <ImageView
-            android:id="@+id/imgWeather"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="50dp"
-            android:layout_marginEnd="50dp"
-            android:scaleType="centerInside"
-            app:layout_constraintBottom_toTopOf="@+id/txtDescription"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/snowy" />
 
         <TextView
             android:id="@+id/txtTemperature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
-            android:text="@{String.valueOf(weather.temperature)}"
-            android:textSize="50sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="0dp"
+            android:layout_height="78dp"
+            android:layout_marginTop="2dp"
+            android:text="@{String.valueOf(weather.temperature) + `\u2103`}"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF"
+            android:textSize="64sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:text="56 C" />
+            app:layout_constraintTop_toBottomOf="@+id/imgWeather"
+            tools:text="56\u2103" />
 
         <TextView
             android:id="@+id/txtCity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="20dp"
+            android:layout_marginTop="8dp"
             android:text="@{weather.cityName}"
-            app:layout_constraintBottom_toTopOf="@+id/imgWeather"
+            android:textColor="#FFFFFF"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtTemperature"
             tools:text="Tinh Tay Ninh" />
+
+        <ImageView
+            android:id="@+id/imgWeather"
+            android:layout_width="75dp"
+            android:layout_height="66dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="84dp"
+            android:layout_marginEnd="50dp"
+            android:scaleType="centerInside"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.521"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/clearsky_night" />
 
         <TextView
             android:id="@+id/txtDescription"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="@{weather.description}"
-            android:textSize="28sp"
-            app:layout_constraintBottom_toTopOf="@+id/txtTemperature"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtCity"
             tools:text="Cloudy day" />
 
         <TextView
             android:id="@+id/txtTimeUpdated"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="4dp"
             android:text="@{`Last update at ` + weather.dateTime}"
-            app:layout_constraintEnd_toStartOf="@+id/txtCity"
-            app:layout_constraintHorizontal_bias="0.064"
+            android:textColor="#FFFFFF"
+            app:layout_constraintEnd_toStartOf="@+id/btnRefresh"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Last update at 00:00" />
 
         <ImageView
             android:id="@+id/btnRefresh"
-            android:layout_width="43dp"
-            android:layout_height="47dp"
-            android:layout_marginEnd="80dp"
-            android:layout_marginBottom="4dp"
+            android:layout_width="23dp"
+            android:layout_height="21dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="4dp"
             android:onClick="onClickRefresh"
-            app:layout_constraintBottom_toTopOf="@+id/imgWeather"
-            app:layout_constraintEnd_toStartOf="@+id/txtCity"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_baseline_refresh_24" />
+
+        <TextView
+            android:id="@+id/txtFeelsLike"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`Feels like ` + String.valueOf(weather.tempFeel) + `\u2103`}"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtDescription"
+            app:layout_constraintVertical_bias="0.024"
+            tools:text="Feels like 54\u2103" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="40dp"
+            android:layout_height="27dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_menu_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

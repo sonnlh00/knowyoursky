@@ -1,44 +1,40 @@
 package com.ngsown.knowyoursky.model;
 
 public class WeatherInfo {
-    private double temperature;
-    private double tempFeel;
+    private int temperature;
+    private int tempFeel;
     private double humidity;
     private String cityName;
     private String description;
     private String weatherType;
     private int iconId;
+    private int backgroundId;
     private String dateTime;
 
-    public WeatherInfo(double temperature, double tempFeel, double humidity, String cityName, String description) {
-        this.temperature = temperature;
-        this.tempFeel = tempFeel;
-        this.humidity = humidity;
-        this.cityName = cityName;
-        this.description = description;
-    }
     public WeatherInfo() {
-        this.temperature = 0.0;
-        this.tempFeel = tempFeel;
-        this.humidity = 0.0;
+        this.temperature = 0;
+        this.tempFeel = 0;
+        this.humidity = 0;
         this.cityName = "";
         this.description = "";
         this.weatherType = "";
+        this.backgroundId = -1;
         this.iconId = -1;
+        this.dateTime = "";
     }
-    public double getTemperature() {
+    public int getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(double temperature) {
+    public void setTemperature(int temperature) {
         this.temperature = temperature;
     }
 
-    public double getTempFeel() {
+    public int getTempFeel() {
         return tempFeel;
     }
 
-    public void setTempFeel(double tempFeel) {
+    public void setTempFeel(int tempFeel) {
         this.tempFeel = tempFeel;
     }
 
@@ -88,5 +84,13 @@ public class WeatherInfo {
 
     public void setDateTime(String dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public int getBackgroundId() {
+        return backgroundId;
+    }
+
+    public void setBackgroundId(int backgroundId) {
+        this.backgroundId = backgroundId;
     }
 }
