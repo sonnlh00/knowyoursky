@@ -1,23 +1,23 @@
 package com.ngsown.knowyoursky.model;
 
-public class WeatherInfo {
+public class CurrentWeather {
     private int temperature;
     private int tempFeel;
     private double humidity;
     private String cityName;
     private String description;
-    private String weatherType;
+    private int weatherType;
     private int iconId;
     private int backgroundId;
     private String dateTime;
 
-    public WeatherInfo() {
+    public CurrentWeather() {
         this.temperature = 0;
         this.tempFeel = 0;
         this.humidity = 0;
         this.cityName = "";
         this.description = "";
-        this.weatherType = "";
+        this.weatherType = 0;
         this.backgroundId = -1;
         this.iconId = -1;
         this.dateTime = "";
@@ -62,11 +62,11 @@ public class WeatherInfo {
         this.description = description;
     }
 
-    public String getWeatherType() {
+    public int getWeatherType() {
         return weatherType;
     }
 
-    public void setWeatherType(String weatherType) {
+    public void setWeatherType(int weatherType) {
         this.weatherType = weatherType;
     }
 

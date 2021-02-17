@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imgHourlyIcon"
+        android:layout_width="41dp"
+        android:layout_height="46dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/clearsky_day" />
+
+    <TextView
+        android:id="@+id/txtHourlyTemp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="20dp"
+        android:text="TextView"
+        android:textAlignment="textStart"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/imgHourlyIcon"
+        app:layout_constraintTop_toBottomOf="@+id/txtHourlyTime"
+        tools:text="56 C" />
+
+    <TextView
+        android:id="@+id/txtHourlyTime"
+        android:layout_width="70dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:text="TextView"
+        android:textAlignment="textStart"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/imgHourlyIcon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="13:00" />
+</androidx.constraintlayout.widget.ConstraintLayout>
