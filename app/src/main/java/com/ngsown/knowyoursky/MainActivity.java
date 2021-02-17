@@ -3,7 +3,6 @@ package com.ngsown.knowyoursky;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ngsown.knowyoursky.adapters.HourlyAdapter;
-import com.ngsown.knowyoursky.databinding.ActivityMainBinding;
 import com.ngsown.knowyoursky.model.CurrentWeather;
 import com.ngsown.knowyoursky.model.HourlyWeather;
 
@@ -29,10 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Queue;
 import java.util.TimeZone;
 
 import okhttp3.Call;
@@ -44,12 +40,11 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
     NetworkChecking networkChecking;
     Observer isNetworkAvailable; // Observer for network changes
-    TextView txtCity, txtTemperature, txtDescription, txtTimeUpdated;
+    TextView txtCity, txtTemperature, txtDescription, txtTimeUpdated, txtFeelsLike;
     ImageView imgWeather;
     ConstraintLayout layout;
     CurrentWeather currentWeather;
     ArrayList<HourlyWeather> hourlyWeathers;
-    ActivityMainBinding binding;
 
     private RecyclerView hourlyRecyclerView;
     private HourlyAdapter hourlyAdapter;
@@ -60,12 +55,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(MainActivity.this,
-                R.layout.activity_main);
-//        txtCity = findViewById(R.id.txtCity);
-//        txtTemperature = findViewById(R.id.txtTemperature);
-//        txtDescription = findViewById(R.id.txtDescription);
-//        txtTimeUpdated = findViewById(R.id.txtTimeUpdated);
+        setContentView(R.layout.activity_main);
+//        binding = DataBindingUtil.setContentView(MainActivity.this,
+//                R.layout.activity_main);
+
+        txtCity = findViewById(R.id.txtCity);
+        txtTemperature = findViewById(R.id.txtTemperature);
+        txtDescription = findViewById(R.id.txtDescription);
+        txtTimeUpdated = findViewById(R.id.txtTimeUpdated);
+        txtFeelsLike = findViewById(R.id.txtFeelsLike);
         imgWeather = findViewById(R.id.imgWeather);
         layout = findViewById(R.id.layoutMain);
         hourlyWeathers = new ArrayList<>();
@@ -152,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("RESPONSE", res);
                         currentWeather = processCurrentData(res);
                         if (currentWeather != null) {
-                            binding.setWeather(currentWeather);
                             runOnUiThread(() -> updateCurrentView());
                         }
                         else
@@ -279,23 +276,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     void updateCurrentView(){
-//        Log.d("DEBUG", (weatherForecast.getWeatherInfo() != null) ? "Not null" : "Null");
-//        txtCity.setText(weatherForecast.getWeatherInfo().getCityName());
-//        txtDescription.setText(weatherForecast.getWeatherInfo().getDescription());
-//        txtTemperature.setText(Double.toString(weatherForecast.getWeatherInfo().getTemperature()) + "\u2103");
-//        txtTimeUpdated.setText(weatherForecast.getWeatherInfo().getDateTime());
-//        Log.d("ICON ID", Integer.toString(weatherForecast.getWeatherInfo().getIconId()));
-
-        imgWeather.setImageDrawable(ContextCompat.getDrawable(this, currentWeather.getIconId()));
-        layout.setBackground(ContextCompat.getDrawable(this, currentWeather.getBackgroundId()));
-
-//        for (int i = 0; i < layout.getChildCount(); i++){
-//            View view = layout.getChildAt(i);
-//            if (view instanceof TextView){
-//                TextView tmp = (TextView)(view);
-//                tmp.setTextColor(Color.WHITE);
-//            }
-//        }
+        txtCity.setText(currentWeather.getCityName());
+        txtDescription.setText(currentWeather.getDescription());
+        txtTemperature.setText(currentWeather.getTemperature() + "\u2103");
+        //txtTimeUpdated.setText("Last updated at " + currentWeather.getDateTime());
+        txtTimeUpdated.setText(String.format(getResources().getString(R.string.last_update_time), currentWeather.getDateTime()));
+        //txtFeelsLike.setText("Feels like " + currentWeather.getTempFeel() + "\u2103");
+        txtFeelsLike.setText(String.format(getResources().getString(R.string.feel_like_temp), currentWeather.getTempFeel()));
+        imgWeather.setImageDrawable(ContextCompat.getDrawable(this, this.currentWeather.getIconId()));
+        layout.setBackground(ContextCompat.getDrawable(this, this.currentWeather.getBackgroundId()));
     }
     void updateHourlyView(){
         hourlyAdapter.setHourlyWeatherList(hourlyWeathers);

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Know Your Sky</string>
+    <string name="last_update_time">Last updated at %s</string>
+    <string name="feel_like_temp">Feels like %d\u2103</string>
 </resources>

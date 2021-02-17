@@ -5,14 +5,8 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkRequest;
 import android.util.Log;
-
-import androidx.core.content.ContextCompat;
-import androidx.databinding.ObservableBoolean;
-
-import com.ngsown.knowyoursky.model.Variables;
-
 import java.util.Observable;
-import java.util.Observer;
+
 
 public class NetworkChecking extends Observable {
     private boolean isNetworkAvailable = false;
