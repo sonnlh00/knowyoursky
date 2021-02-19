@@ -1,8 +1,6 @@
 package com.ngsown.knowyoursky.adapters;
 
 import android.content.Context;
-import android.media.Image;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,26 +8,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ngsown.knowyoursky.R;
-import com.ngsown.knowyoursky.model.HourlyWeather;
+import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
 
 import java.util.List;
 
 public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.ViewHolder> {
-    private List<HourlyWeather> hourlyWeatherList;
+    private List<HourlyForecast> hourlyForecastList;
     private Context context;
 
-    public HourlyAdapter(List<HourlyWeather> hourlyWeatherList, Context context) {
-        this.hourlyWeatherList = hourlyWeatherList;
+    public HourlyAdapter(List<HourlyForecast> hourlyForecastList, Context context) {
+        this.hourlyForecastList = hourlyForecastList;
         this.context = context;
     }
 
-    public void setHourlyWeatherList(List<HourlyWeather> hourlyWeatherList) {
-        this.hourlyWeatherList = hourlyWeatherList;
+    public void setHourlyForecastList(List<HourlyForecast> hourlyForecastList) {
+        this.hourlyForecastList = hourlyForecastList;
     }
 
     @NonNull
@@ -43,16 +40,16 @@ public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        HourlyWeather hourlyWeather = hourlyWeatherList.get(position);
-        holder.imgWeatherIcon.setImageDrawable(ContextCompat.getDrawable(context, hourlyWeather.getIconId()));
-        holder.txtHourlyTime.setText(hourlyWeather.getDateTime());
-        holder.txtHourlyTemp.setText(Integer.toString(hourlyWeather.getTemperature()) + "\u2103");
+        HourlyForecast hourlyForecast = hourlyForecastList.get(position);
+        holder.imgWeatherIcon.setImageDrawable(ContextCompat.getDrawable(context, hourlyForecast.getIconId()));
+        holder.txtHourlyTime.setText(hourlyForecast.getDateTime());
+        holder.txtHourlyTemp.setText(Integer.toString(hourlyForecast.getTemperature()) + "\u2103");
     }
 
 
     @Override
     public int getItemCount() {
-        return hourlyWeatherList.size();
+        return hourlyForecastList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

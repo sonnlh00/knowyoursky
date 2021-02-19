@@ -1,6 +1,6 @@
-package com.ngsown.knowyoursky.model;
+package com.ngsown.knowyoursky.domain.forecast;
 
-public class HourlyWeather {
+public class HourlyForecast {
     private int temperature;
     private int weatherType;
     private int iconId;

@@ -1,4 +1,4 @@
-package com.ngsown.knowyoursky;
+package com.ngsown.knowyoursky.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

@@ -1,4 +1,4 @@
-package com.ngsown.knowyoursky;
+package com.ngsown.knowyoursky.ui.custom;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

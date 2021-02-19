@@ -1,6 +1,6 @@
-package com.ngsown.knowyoursky.model;
+package com.ngsown.knowyoursky.domain.forecast;
 
-public class CurrentWeather {
+public class CurrentForecast {
     private int temperature;
     private int tempFeel;
     private double humidity;
@@ -11,7 +11,7 @@ public class CurrentWeather {
     private int backgroundId;
     private String dateTime;
 
-    public CurrentWeather() {
+    public CurrentForecast() {
         this.temperature = 0;
         this.tempFeel = 0;
         this.humidity = 0;
