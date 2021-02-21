@@ -1,5 +1,6 @@
 package com.ngsown.knowyoursky.ui.main;
 
+import com.ngsown.knowyoursky.domain.UserLocationManager;
 import com.ngsown.knowyoursky.domain.forecast.CurrentForecast;
 import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
 import com.ngsown.knowyoursky.ui.base.BasePresenter;
@@ -11,10 +12,18 @@ public interface MainContract {
     interface Presenter extends BasePresenter {
         void loadCurrentForecast();
         void loadHourlyForecast();
+        void loadForecast();
         void reloadForecast();
+        void setLocationManager(UserLocationManager userLocationManager);
+        void onLocationPermissionGranted();
+        void onLocationPermissionDenied();
     }
     interface View extends BaseView<Presenter> {
         void showCurrentForecast(CurrentForecast currentForecast);
         void showHourlyForecast(List<HourlyForecast> hourlyForecasts);
+        void showNoLocationPermissionError();
+        void showNoInternetError();
+        void showLoadingLocationToast();
+        void showLocationDetectedAlert();
     }
 }
