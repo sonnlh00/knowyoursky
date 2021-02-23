@@ -85,6 +85,12 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         customAlertDialog.show(getSupportFragmentManager(), "Error");
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        presenter.pause();
+    }
+
     public void onClickRefresh(View view) {
         Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {

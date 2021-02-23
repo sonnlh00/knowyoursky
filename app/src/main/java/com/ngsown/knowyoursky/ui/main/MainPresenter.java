@@ -1,10 +1,6 @@
 package com.ngsown.knowyoursky.ui.main;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.RequiresPermission;
@@ -26,8 +22,8 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.observers.DisposableObserver;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-public class MainPresenter implements MainContract.Presenter {
 
+public class MainPresenter implements MainContract.Presenter {
     private final PrefsHelper prefsHelper;
     String apiKey = "fe2cae6dc99f16488b3bf799d3b6330c";
     Location location;
@@ -97,7 +93,7 @@ public class MainPresenter implements MainContract.Presenter {
         this.userLocationManager = locationManager;
         this.prefsHelper = prefsHelper;
     }
-    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
     @Override
     public void loadForecast() {
         location = userLocationManager.getLocation();
@@ -185,46 +181,9 @@ public class MainPresenter implements MainContract.Presenter {
                     }));
         }
     }
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
     public void reloadForecast(){
         Log.d("MAIN_PRESENTER", "Reloading forecast");
-//        latitude = 10.644363;
-//        longitude = 106.488701;
-        // Dispose old observers
-//        currentForecastObserver.dispose();
-//        hourlyForecastObserver.dispose();
-
-//        currentForecastObserver = new DisposableObserver<CurrentForecast>() {
-//            @Override
-//            public void onNext(@NonNull CurrentForecast currentForecast) {
-//                showCurrentForecast(currentForecast);
-//            }
-//
-//            @Override
-//            public void onError(@NonNull Throwable e) {
-//
-//            }
-//
-//            @Override
-//            public void onComplete() {
-//
-//            }
-//        };
-//        hourlyForecastObserver = new DisposableObserver<List<HourlyForecast>>() {
-//            @Override
-//            public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
-//                showHourlyForecast(hourlyForecasts);
-//            }
-//
-//            @Override
-//            public void onError(@NonNull Throwable e) {
-//
-//            }
-//
-//            @Override
-//            public void onComplete() {
-//
-//            }
-//        };
         loadForecast();
     }
 
@@ -237,6 +196,7 @@ public class MainPresenter implements MainContract.Presenter {
     public void onLocationPermissionGranted() {
         userLocationManager.permissionGranted();
         threadExecutor.run(new Interactor() {
+            @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
             @Override
             public void run() {
                 Log.d("PER_GRANTED","After calling per granted");
@@ -257,6 +217,7 @@ public class MainPresenter implements MainContract.Presenter {
         view.showHourlyForecast(hourlyForecasts);
     }
     @Override
+
     public void initialize() {
 //        if (Looper.getMainLooper().getThread() == Thread.currentThread()){
 //            Log.d("THREAD", "Running on UI thread");
@@ -269,6 +230,7 @@ public class MainPresenter implements MainContract.Presenter {
             Log.d("THREAD_EXECUTOR", "Before loading forecast");
             threadExecutor.run(new Interactor() {
                 @Override
+                @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
                 public void run() {
                     Log.d("THREAD_EXECUTOR", "Load forecast");
                     loadForecast();
@@ -292,9 +254,13 @@ public class MainPresenter implements MainContract.Presenter {
     public void resume() {
 
     }
-
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
     @Override
     public void pause() {
-
+        Log.d("LIFE_CYCLE", "OnPause");
+        Location temp = userLocationManager.getLocation();
+        Log.d("NEW_PREFS", String.format("lat: %f lon: %f", temp.getLatitude(), temp.getLongitude()));
+        prefsHelper.setLatitude(temp.getLatitude());
+        prefsHelper.setLongitude(temp.getLongitude());
     }
 }
