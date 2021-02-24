@@ -2,6 +2,6 @@ package com.ngsown.knowyoursky.ui.base;
 
 import com.ngsown.knowyoursky.ui.main.MainContract;
 
-public interface BaseView <T> {
-    void setPresenter(T presenter);
+public interface BaseView {
+
 }

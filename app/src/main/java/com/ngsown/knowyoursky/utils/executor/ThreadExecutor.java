@@ -1,4 +1,4 @@
-package com.ngsown.knowyoursky.utils;
+package com.ngsown.knowyoursky.utils.executor;
 
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.BlockingQueue;
@@ -16,7 +16,7 @@ public class ThreadExecutor implements Executor {
     private static final BlockingQueue<Runnable> WORK_QUEUE = new LinkedBlockingQueue<Runnable>();
 
     private ThreadPoolExecutor threadPoolExecutor;
-
+    @Inject
     public ThreadExecutor() {
         int corePoolSize = CORE_POOL_SIZE;
         int maxPoolSize = MAX_POOL_SIZE;

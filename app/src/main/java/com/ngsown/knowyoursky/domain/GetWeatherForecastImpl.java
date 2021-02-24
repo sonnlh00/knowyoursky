@@ -16,12 +16,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.inject.Inject;
+
 import io.reactivex.rxjava3.core.Observable;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class GetWeatherForecastImpl implements GetWeatherForecast {
+
+    @Inject
+    public GetWeatherForecastImpl() {
+    }
+
     @Override
     public Observable<CurrentForecast> getCurrentForecast(double latitude, double longitude, String apiKey) {
         String requestURL = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%1$f&lon=%2$f&units=metric&appid=%3$s",

@@ -1,4 +1,4 @@
-package com.ngsown.knowyoursky.utils;
+package com.ngsown.knowyoursky.utils.rxjava;
 
 import io.reactivex.rxjava3.core.Scheduler;
 

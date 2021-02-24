@@ -5,18 +5,21 @@ import android.util.Log;
 
 import androidx.annotation.RequiresPermission;
 
+import com.ngsown.knowyoursky.di.ApiKey;
 import com.ngsown.knowyoursky.domain.GetWeatherForecast;
 import com.ngsown.knowyoursky.domain.forecast.CurrentForecast;
 import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
 import com.ngsown.knowyoursky.domain.location.Location;
 import com.ngsown.knowyoursky.domain.UserLocationManager;
 import com.ngsown.knowyoursky.domain.prefs.PrefsHelper;
-import com.ngsown.knowyoursky.utils.Interactor;
+import com.ngsown.knowyoursky.utils.executor.Interactor;
 import com.ngsown.knowyoursky.utils.NetworkChecking;
-import com.ngsown.knowyoursky.utils.SchedulerProvider;
-import com.ngsown.knowyoursky.utils.ThreadExecutor;
+import com.ngsown.knowyoursky.utils.rxjava.SchedulerProvider;
+import com.ngsown.knowyoursky.utils.executor.ThreadExecutor;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -25,15 +28,16 @@ import io.reactivex.rxjava3.observers.DisposableObserver;
 public class MainPresenter implements MainContract.Presenter {
     private final PrefsHelper prefsHelper;
     private final SchedulerProvider schedulerProvider;
-    String apiKey = "fe2cae6dc99f16488b3bf799d3b6330c";
-    Location location;
+    private String apiKey;
+    private Location location;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
     private final GetWeatherForecast getWeatherForecast; // model
-    private final MainContract.View view; // view
+    private MainContract.View view; // view
     private UserLocationManager userLocationManager;
     private NetworkChecking networkChecking;
     private ThreadExecutor threadExecutor = new ThreadExecutor();
+    // TODO: implement network checking
     private DisposableObserver<Boolean> networkObserver = new DisposableObserver<Boolean>() {
         @Override
         public void onNext(@NonNull Boolean aBoolean) {
@@ -54,18 +58,19 @@ public class MainPresenter implements MainContract.Presenter {
         }
     };
 
-    public MainPresenter(MainContract.View view,
-                         GetWeatherForecast getWeatherForecast,
+    @Inject
+    public MainPresenter(GetWeatherForecast getWeatherForecast,
                          NetworkChecking networkChecking,
                          UserLocationManager locationManager,
                          PrefsHelper prefsHelper,
-                         SchedulerProvider schedulerProvider) {
-        this.view = view;
+                         SchedulerProvider schedulerProvider,
+                         @ApiKey String apiKey) {
         this.getWeatherForecast = getWeatherForecast;
         this.networkChecking = networkChecking;
         this.userLocationManager = locationManager;
         this.prefsHelper = prefsHelper;
         this.schedulerProvider = schedulerProvider;
+        this.apiKey = apiKey;
     }
     @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
     @Override
@@ -142,7 +147,7 @@ public class MainPresenter implements MainContract.Presenter {
                     .subscribeWith(new DisposableObserver<List<HourlyForecast>>() {
                         @Override
                         public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
-                            view.showHourlyForecast(hourlyForecasts);
+                            showHourlyForecast(hourlyForecasts);
                         }
 
                         @Override
@@ -195,7 +200,12 @@ public class MainPresenter implements MainContract.Presenter {
     private void showHourlyForecast(List<HourlyForecast> hourlyForecasts){
         view.showHourlyForecast(hourlyForecasts);
     }
-    
+
+    @Override
+    public void setView(MainContract.View view) {
+        this.view = view;
+    }
+
     @Override
     public void initialize() {
 //        if (Looper.getMainLooper().getThread() == Thread.currentThread()){
@@ -207,25 +217,16 @@ public class MainPresenter implements MainContract.Presenter {
         userLocationManager.checkPermission();
         if (userLocationManager.isPermissionGranted()) {
             Log.d("THREAD_EXECUTOR", "Before loading forecast");
-            threadExecutor.run(new Interactor() {
-                @Override
-                @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
-                public void run() {
-                    Log.d("THREAD_EXECUTOR", "Load forecast");
-                    loadForecast();
-                }
+            threadExecutor.run(() -> {
+                Log.d("THREAD_EXECUTOR", "Load forecast");
+                loadForecast();
             });
         }
         new CompositeDisposable().add(networkChecking.getNetworkObservable()
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.io())
                 .subscribeWith(networkObserver));
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                networkChecking.registerNetworkCallback();
-            }
-        }).start();
+        new Thread(() -> networkChecking.registerNetworkCallback()).start();
 
     }
 
@@ -239,8 +240,10 @@ public class MainPresenter implements MainContract.Presenter {
     public void pause() {
         Log.d("LIFE_CYCLE", "OnPause");
         Location temp = userLocationManager.getLocation();
-        Log.d("NEW_PREFS", String.format("lat: %f lon: %f", temp.getLatitude(), temp.getLongitude()));
-        prefsHelper.setLatitude(temp.getLatitude());
-        prefsHelper.setLongitude(temp.getLongitude());
+        if (temp != null) {
+            Log.d("NEW_PREFS", String.format("lat: %f lon: %f", temp.getLatitude(), temp.getLongitude()));
+            prefsHelper.setLatitude(temp.getLatitude());
+            prefsHelper.setLongitude(temp.getLongitude());
+        }
     }
 }

@@ -9,7 +9,7 @@ import com.ngsown.knowyoursky.ui.base.BaseView;
 import java.util.List;
 
 public interface MainContract {
-    interface Presenter extends BasePresenter {
+    interface Presenter extends BasePresenter<View> {
         void loadCurrentForecast();
         void loadHourlyForecast();
         void loadForecast();
@@ -18,7 +18,7 @@ public interface MainContract {
         void onLocationPermissionGranted();
         void onLocationPermissionDenied();
     }
-    interface View extends BaseView<Presenter> {
+    interface View extends BaseView {
         void showCurrentForecast(CurrentForecast currentForecast);
         void showHourlyForecast(List<HourlyForecast> hourlyForecasts);
         void showNoLocationPermissionError();

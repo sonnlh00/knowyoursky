@@ -6,6 +6,8 @@ import android.net.Network;
 import android.net.NetworkRequest;
 import android.util.Log;
 
+import javax.inject.Inject;
+
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.BehaviorSubject;
 
@@ -14,6 +16,7 @@ public class NetworkChecking{
     private boolean isNetworkAvailable = false;
     private Context context;
     private BehaviorSubject<Boolean> observable = BehaviorSubject.create();
+    @Inject
     public NetworkChecking(Context context){
         this.context = context;
     }

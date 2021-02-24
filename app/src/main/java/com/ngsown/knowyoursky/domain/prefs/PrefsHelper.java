@@ -3,6 +3,11 @@ package com.ngsown.knowyoursky.domain.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.ngsown.knowyoursky.di.ActivityContext;
+import com.ngsown.knowyoursky.di.PrefsFile;
+
+import javax.inject.Inject;
+
 public class PrefsHelper {
     public static final String PREF_KEY_LATITUDE = "PREF_KEY_LATITUDE";
     public static final String PREF_KEY_LONGITUDE = "PREF_KEY_LONGITUDE";
@@ -10,8 +15,8 @@ public class PrefsHelper {
     public static final String PREF_KEY_HOURLY_WEATHER = "PREF_KEY_HOURLY_WEATHER";
 
     private final SharedPreferences sharedPreferences;
-
-    public PrefsHelper(Context context, String prefsFile){
+    @Inject
+    public PrefsHelper(@ActivityContext Context context,@PrefsFile String prefsFile){
         sharedPreferences = context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
     }
 

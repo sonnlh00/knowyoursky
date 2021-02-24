@@ -14,8 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ngsown.knowyoursky.domain.GetWeatherForecastImpl;
-import com.ngsown.knowyoursky.domain.prefs.PrefsHelper;
+import com.ngsown.knowyoursky.di.component.ActivityComponent;
+import com.ngsown.knowyoursky.di.component.DaggerActivityComponent;
+import com.ngsown.knowyoursky.di.module.ActivityModule;
 import com.ngsown.knowyoursky.ui.custom.CustomAlertDialog;
 import com.ngsown.knowyoursky.domain.UserLocationManager;
 import com.ngsown.knowyoursky.utils.NetworkChecking;
@@ -23,25 +24,27 @@ import com.ngsown.knowyoursky.R;
 import com.ngsown.knowyoursky.adapters.HourlyAdapter;
 import com.ngsown.knowyoursky.domain.forecast.CurrentForecast;
 import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
-import com.ngsown.knowyoursky.utils.SchedulerProvider;
-import com.ngsown.knowyoursky.utils.SchedulerProviderImpl;
-import com.ngsown.knowyoursky.utils.ThreadExecutor;
+import com.ngsown.knowyoursky.utils.executor.ThreadExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observer;
 
+import javax.inject.Inject;
+
 public class MainActivity extends AppCompatActivity implements MainContract.View {
-    NetworkChecking networkChecking;
-    Observer isNetworkAvailable; // Observer for network changes
     TextView txtCity, txtTemperature, txtDescription, txtTimeUpdated, txtFeelsLike;
     ImageView imgWeather;
     ConstraintLayout layout;
-    ThreadExecutor threadExecutor = new ThreadExecutor();
+
+    @Inject
     MainContract.Presenter presenter;
 
     private RecyclerView hourlyRecyclerView;
     private HourlyAdapter hourlyAdapter;
+
+    private ActivityComponent activityComponent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,26 +65,11 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         hourlyRecyclerView.setLayoutManager(layoutManager);
         hourlyRecyclerView.setAdapter(hourlyAdapter);
         //endregion
-        GetWeatherForecastImpl getWeatherForecast = new GetWeatherForecastImpl();
-        NetworkChecking networkChecking = new NetworkChecking(this);
-        //networkChecking.registerNetworkCallback();
-        UserLocationManager userLocationManager = new UserLocationManager(this);
-        SchedulerProvider schedulerProvider = new SchedulerProviderImpl();
-        MainPresenter mPresenter = new MainPresenter(this, getWeatherForecast, networkChecking, userLocationManager, new PrefsHelper(this, "location"), schedulerProvider);
-        setPresenter(mPresenter);
+
+        activityComponent = DaggerActivityComponent.builder().activityModule(new ActivityModule(this)).build();
+        activityComponent.inject(this);
+        presenter.setView(this);
         presenter.initialize();
-//        threadExecutor.run(new Interactor() {
-//            @Override
-//            public void run() {
-//
-//            }
-//        });
-    }
-
-
-    void alertInternetError() {
-        CustomAlertDialog customAlertDialog = new CustomAlertDialog("No internet connection!");
-        customAlertDialog.show(getSupportFragmentManager(), "Error");
     }
 
     @Override
@@ -92,12 +80,7 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     public void onClickRefresh(View view) {
         Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                presenter.reloadForecast();
-            }
-        }).start();
+        new Thread(() -> presenter.reloadForecast()).start();
     }
 
     @Override
@@ -131,11 +114,6 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     }
 
     @Override
-    public void setPresenter(MainContract.Presenter presenter) {
-        this.presenter = presenter;
-    }
-
-    @Override
     public void showNoLocationPermissionError() {
         CustomAlertDialog locationError = new CustomAlertDialog("Location permission denied!");
         locationError.show(getSupportFragmentManager(), "Error");
@@ -149,22 +127,14 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     @Override
     public void showLoadingLocationToast() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this,"Detecting your location....", Toast.LENGTH_LONG).show();
-            }
-        });
+        runOnUiThread(() -> Toast.makeText(MainActivity.this,"Detecting your location....", Toast.LENGTH_LONG).show());
     }
 
     @Override
     public void showLocationDetectedAlert() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                CustomAlertDialog locationError = new CustomAlertDialog("Location detected, please refresh");
-                locationError.show(getSupportFragmentManager(), "Success");
-            }
+        runOnUiThread(() -> {
+            CustomAlertDialog locationError = new CustomAlertDialog("Location detected, please refresh");
+            locationError.show(getSupportFragmentManager(), "Success");
         });
     }
 }
