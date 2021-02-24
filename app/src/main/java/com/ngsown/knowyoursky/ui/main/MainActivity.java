@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,18 +18,17 @@ import com.ngsown.knowyoursky.domain.GetWeatherForecastImpl;
 import com.ngsown.knowyoursky.domain.prefs.PrefsHelper;
 import com.ngsown.knowyoursky.ui.custom.CustomAlertDialog;
 import com.ngsown.knowyoursky.domain.UserLocationManager;
-import com.ngsown.knowyoursky.utils.Interactor;
 import com.ngsown.knowyoursky.utils.NetworkChecking;
 import com.ngsown.knowyoursky.R;
 import com.ngsown.knowyoursky.adapters.HourlyAdapter;
 import com.ngsown.knowyoursky.domain.forecast.CurrentForecast;
 import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
+import com.ngsown.knowyoursky.utils.SchedulerProvider;
+import com.ngsown.knowyoursky.utils.SchedulerProviderImpl;
 import com.ngsown.knowyoursky.utils.ThreadExecutor;
 
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 import java.util.Observer;
 
 public class MainActivity extends AppCompatActivity implements MainContract.View {
@@ -68,7 +66,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         NetworkChecking networkChecking = new NetworkChecking(this);
         //networkChecking.registerNetworkCallback();
         UserLocationManager userLocationManager = new UserLocationManager(this);
-        MainPresenter mPresenter = new MainPresenter(this, getWeatherForecast, networkChecking, userLocationManager, new PrefsHelper(this, "location"));
+        SchedulerProvider schedulerProvider = new SchedulerProviderImpl();
+        MainPresenter mPresenter = new MainPresenter(this, getWeatherForecast, networkChecking, userLocationManager, new PrefsHelper(this, "location"), schedulerProvider);
         setPresenter(mPresenter);
         presenter.initialize();
 //        threadExecutor.run(new Interactor() {

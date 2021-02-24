@@ -22,6 +22,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class GetWeatherForecastImpl implements GetWeatherForecast {
+    @Override
     public Observable<CurrentForecast> getCurrentForecast(double latitude, double longitude, String apiKey) {
         String requestURL = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%1$f&lon=%2$f&units=metric&appid=%3$s",
                 latitude,
@@ -29,6 +30,15 @@ public class GetWeatherForecastImpl implements GetWeatherForecast {
                 apiKey);
         return doCurrentForecastApi(requestURL);
     }
+    @Override
+    public Observable<List<HourlyForecast>> getHourlyForecast(double latitude, double longitude, String apiKey){
+        String requestURL = String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%1$f&lon=%2$f&exclude=current,minutely,daily&units=metric&appid=%3$s",
+                latitude,
+                longitude,
+                apiKey);
+        return doHourlyForecastApi(requestURL);
+    }
+
     private Observable<CurrentForecast> doCurrentForecastApi(String requestURL){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(requestURL).build();
@@ -78,14 +88,6 @@ public class GetWeatherForecastImpl implements GetWeatherForecast {
         else {
             return null;
         }
-    }
-
-    public Observable<List<HourlyForecast>> getHourlyForecast(double latitude, double longitude, String apiKey){
-        String requestURL = String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%1$f&lon=%2$f&exclude=current,minutely,daily&units=metric&appid=%3$s",
-                latitude,
-                longitude,
-                apiKey);
-        return doHourlyForecastApi(requestURL);
     }
     private Observable<List<HourlyForecast>> doHourlyForecastApi(String requestURL){
         OkHttpClient client = new OkHttpClient();
