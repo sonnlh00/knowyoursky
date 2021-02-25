@@ -10,11 +10,8 @@ import java.util.List;
 
 public interface MainContract {
     interface Presenter extends BasePresenter<View> {
-        void loadCurrentForecast();
-        void loadHourlyForecast();
         void loadForecast();
         void reloadForecast();
-        void setLocationManager(UserLocationManager userLocationManager);
         void onLocationPermissionGranted();
         void onLocationPermissionDenied();
     }

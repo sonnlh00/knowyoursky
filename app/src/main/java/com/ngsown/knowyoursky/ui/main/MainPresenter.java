@@ -1,6 +1,7 @@
 package com.ngsown.knowyoursky.ui.main;
 
 import android.Manifest;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.RequiresPermission;
@@ -22,7 +23,9 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.observers.DisposableObserver;
 
 public class MainPresenter implements MainContract.Presenter {
@@ -36,7 +39,6 @@ public class MainPresenter implements MainContract.Presenter {
     private MainContract.View view; // view
     private UserLocationManager userLocationManager;
     private NetworkChecking networkChecking;
-    private ThreadExecutor threadExecutor = new ThreadExecutor();
     // TODO: implement network checking
     private DisposableObserver<Boolean> networkObserver = new DisposableObserver<Boolean>() {
         @Override
@@ -110,15 +112,19 @@ public class MainPresenter implements MainContract.Presenter {
     }
     
     @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
-    public void loadCurrentForecast(){
+    private void loadCurrentForecast(){
         if (location != null) {
-            compositeDisposable.add(getWeatherForecast.getCurrentForecast(location.getLatitude(), location.getLongitude(), apiKey)
-                    .subscribeOn(schedulerProvider.io())
-                    .observeOn(schedulerProvider.mainThread())
-                    .subscribeWith(new DisposableObserver<CurrentForecast>() {
+            getWeatherForecast.getCurrentForecast(location.getLatitude(), location.getLongitude(), apiKey,
+                    new Observer<CurrentForecast>(){
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+                            compositeDisposable.add(d);
+                        }
+
                         @Override
                         public void onNext(@NonNull CurrentForecast currentForecast) {
                             showCurrentForecast(currentForecast);
+                            Log.d("MainPresenter", "Current forecast observer: onNext");
                         }
 
                         @Override
@@ -128,38 +134,38 @@ public class MainPresenter implements MainContract.Presenter {
 
                         @Override
                         public void onComplete() {
-
+                            Log.d("MainPresenter", "Current forecast observer: onComplete");
                         }
-                    }));
-
+                    });
         }
         else
             view.showNoLocationPermissionError();
     }
     
     @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
-    @Override
-    public void loadHourlyForecast() {
+    private void loadHourlyForecast() {
         if (location != null) {
-            compositeDisposable.add(getWeatherForecast.getHourlyForecast(location.getLatitude(), location.getLongitude(), apiKey)
-                    .subscribeOn(schedulerProvider.io())
-                    .observeOn(schedulerProvider.mainThread())
-                    .subscribeWith(new DisposableObserver<List<HourlyForecast>>() {
-                        @Override
-                        public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
-                            showHourlyForecast(hourlyForecasts);
-                        }
+            getWeatherForecast.getHourlyForecast(location.getLatitude(), location.getLongitude(), apiKey, new Observer<List<HourlyForecast>>() {
+                @Override
+                public void onSubscribe(@NonNull Disposable d) {
+                    compositeDisposable.add(d);
+                }
 
-                        @Override
-                        public void onError(@NonNull Throwable e) {
+                @Override
+                public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
+                    showHourlyForecast(hourlyForecasts);
+                }
 
-                        }
+                @Override
+                public void onError(@NonNull Throwable e) {
 
-                        @Override
-                        public void onComplete() {
+                }
 
-                        }
-                    }));
+                @Override
+                public void onComplete() {
+
+                }
+            });
         }
     }
     
@@ -168,24 +174,21 @@ public class MainPresenter implements MainContract.Presenter {
         Log.d("MAIN_PRESENTER", "Reloading forecast");
         loadForecast();
     }
-
-    @Override
-    public void setLocationManager(UserLocationManager userLocationManager) {
-        this.userLocationManager = userLocationManager;
-    }
     
     @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
     @Override
     public void onLocationPermissionGranted() {
         userLocationManager.permissionGranted();
-        threadExecutor.run(new Interactor() {
-            @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
-            @Override
-            public void run() {
-                Log.d("PER_GRANTED","After calling per granted");
-                loadForecast();
-            }
-        });
+        loadForecast();
+//        threadExecutor.run(new Interactor() {
+//            @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
+//            @Override
+//            public void run() {
+//                Log.d("PER_GRANTED","After calling per granted");
+//
+//            }
+//        });
+
     }
 
     @Override
@@ -216,11 +219,7 @@ public class MainPresenter implements MainContract.Presenter {
         Log.d("INITIALIZE", "Load forecast");
         userLocationManager.checkPermission();
         if (userLocationManager.isPermissionGranted()) {
-            Log.d("THREAD_EXECUTOR", "Before loading forecast");
-            threadExecutor.run(() -> {
-                Log.d("THREAD_EXECUTOR", "Load forecast");
-                loadForecast();
-            });
+            loadForecast();
         }
         new CompositeDisposable().add(networkChecking.getNetworkObservable()
                 .subscribeOn(schedulerProvider.io())

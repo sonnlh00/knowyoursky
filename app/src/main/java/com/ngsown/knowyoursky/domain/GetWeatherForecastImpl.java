@@ -3,6 +3,7 @@ package com.ngsown.knowyoursky.domain;
 import com.ngsown.knowyoursky.R;
 import com.ngsown.knowyoursky.domain.forecast.CurrentForecast;
 import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
+import com.ngsown.knowyoursky.utils.rxjava.SchedulerProvider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,50 +15,88 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.inject.Inject;
 
+import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableEmitter;
+import io.reactivex.rxjava3.core.ObservableOnSubscribe;
+import io.reactivex.rxjava3.core.Observer;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class GetWeatherForecastImpl implements GetWeatherForecast {
-
+    SchedulerProvider schedulerProvider;
     @Inject
-    public GetWeatherForecastImpl() {
+    public GetWeatherForecastImpl(SchedulerProvider schedulerProvider) {
+        this.schedulerProvider = schedulerProvider;
     }
-
     @Override
-    public Observable<CurrentForecast> getCurrentForecast(double latitude, double longitude, String apiKey) {
-        String requestURL = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%1$f&lon=%2$f&units=metric&appid=%3$s",
+    public void getCurrentForecast(double latitude, double longitude, String apiKey, Observer<CurrentForecast> observer){
+        String requestURL = String.format(Locale.US, "https://api.openweathermap.org/data/2.5/weather?lat=%1$f&lon=%2$f&units=metric&appid=%3$s",
                 latitude,
                 longitude,
                 apiKey);
-        return doCurrentForecastApi(requestURL);
+        Observable<CurrentForecast> observable = Observable.create(new ObservableOnSubscribe<CurrentForecast>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<CurrentForecast> emitter) throws Throwable {
+                emitter.onNext(doCurrentForecastApi(requestURL));
+                emitter.onComplete();
+            }
+        })
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.mainThread());
+        observable.subscribe(observer);
     }
+
     @Override
-    public Observable<List<HourlyForecast>> getHourlyForecast(double latitude, double longitude, String apiKey){
-        String requestURL = String.format("https://api.openweathermap.org/data/2.5/onecall?lat=%1$f&lon=%2$f&exclude=current,minutely,daily&units=metric&appid=%3$s",
+    public void getHourlyForecast(double latitude, double longitude, String apiKey, Observer<List<HourlyForecast>> observer){
+        String requestURL = String.format(Locale.US, "https://api.openweathermap.org/data/2.5/onecall?lat=%1$f&lon=%2$f&exclude=current,minutely,daily&units=metric&appid=%3$s",
                 latitude,
                 longitude,
                 apiKey);
-        return doHourlyForecastApi(requestURL);
+        Observable<List<HourlyForecast>> observable = Observable.create(new ObservableOnSubscribe<List<HourlyForecast>>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<List<HourlyForecast>> emitter) throws Throwable {
+                emitter.onNext(doHourlyForecastApi(requestURL));
+                emitter.onComplete();
+            }
+        })
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.mainThread());
+        observable.subscribe(observer);
     }
 
-    private Observable<CurrentForecast> doCurrentForecastApi(String requestURL){
+    private CurrentForecast doCurrentForecastApi(String requestURL){
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(requestURL).build();
         CurrentForecast forecast = new CurrentForecast();
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-             forecast = processCurrentData(response.body().string());
+            forecast = processCurrentData(response.body().string());
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
-        return Observable.just(forecast);
+        return forecast;
     }
+
+    private List<HourlyForecast> doHourlyForecastApi(String requestURL){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(requestURL).build();
+        List<HourlyForecast> forecast = new ArrayList<>();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            forecast = processHourlyData(response.body().string());
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return forecast;
+    }
+
     private CurrentForecast processCurrentData(String weatherData) throws JSONException{
         JSONObject resObject = new JSONObject(weatherData);
         if (resObject.getInt("cod") == 200) {
@@ -96,18 +135,7 @@ public class GetWeatherForecastImpl implements GetWeatherForecast {
             return null;
         }
     }
-    private Observable<List<HourlyForecast>> doHourlyForecastApi(String requestURL){
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(requestURL).build();
-        List<HourlyForecast> forecast = new ArrayList<>();
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            forecast = processHourlyData(response.body().string());
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-        return Observable.just(forecast);
-    }
+
     private ArrayList<HourlyForecast> processHourlyData(String weatherData) throws JSONException {
         ArrayList<HourlyForecast> hourlyForecasts = new ArrayList<>();
         JSONObject resObj = new JSONObject(weatherData);
@@ -138,6 +166,7 @@ public class GetWeatherForecastImpl implements GetWeatherForecast {
         }
         return hourlyForecasts;
     }
+
     private int getIconId(int weatherType, int hourInDay){
         if (hourInDay >= 6 && hourInDay <= 18) {
             switch (weatherType / 100) {

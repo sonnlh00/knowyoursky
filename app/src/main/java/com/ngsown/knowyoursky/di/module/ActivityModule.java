@@ -36,8 +36,8 @@ public class ActivityModule {
     }
 
     @Provides
-    public GetWeatherForecast provideGetWeatherForecast(){
-        return new GetWeatherForecastImpl();
+    public GetWeatherForecast provideGetWeatherForecast(SchedulerProvider scheduler){
+        return new GetWeatherForecastImpl(scheduler);
     }
 
     @Provides

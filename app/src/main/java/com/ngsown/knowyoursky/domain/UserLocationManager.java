@@ -16,7 +16,12 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.ngsown.knowyoursky.di.CompatActivity;
 import com.ngsown.knowyoursky.domain.location.Location;
@@ -30,12 +35,13 @@ public class UserLocationManager{
     private AppCompatActivity context;
     private boolean isPermissionGranted = false;
     private boolean isLocationUpdated = false;
+    private boolean isLocationServiceOn = false;
     private double latitude = 0.0;
     private double longitude = 0.0;
 
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
-
+    private SettingsClient settingsClient;
     @Inject
     public UserLocationManager(@CompatActivity AppCompatActivity context) {
         this.context = context;
@@ -67,6 +73,22 @@ public class UserLocationManager{
     @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION})
     public void permissionGranted(){
         isPermissionGranted = true;
+        checkLocationService();
+//        Log.d("PERMISSION", "Location permission granted!");
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
+//            @Override
+//            public void onLocationChanged(@NonNull android.location.Location location) {
+////                Log.d("LOCATION",String.format("lat: %f lon: %f",
+////                        location.getLatitude(),
+////                        location.getLongitude()));
+////                //isLocationUpdated = true;
+////                //setLocation(location.getLatitude(), location.getLongitude());
+//            }
+//        });
+//        Log.d("PERMISSION","Finished permissionGranted");
+    }
+    @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION})
+    private void onLocationServiceOn(){
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         Task<android.location.Location> locationTask = fusedLocationProviderClient.getLastLocation();
         locationTask.addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
@@ -100,20 +122,33 @@ public class UserLocationManager{
                 super.onLocationAvailability(locationAvailability);
             }
         }, Looper.myLooper());
-//        Log.d("PERMISSION", "Location permission granted!");
-//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
-//            @Override
-//            public void onLocationChanged(@NonNull android.location.Location location) {
-////                Log.d("LOCATION",String.format("lat: %f lon: %f",
-////                        location.getLatitude(),
-////                        location.getLongitude()));
-////                //isLocationUpdated = true;
-////                //setLocation(location.getLatitude(), location.getLongitude());
-//            }
-//        });
-//        Log.d("PERMISSION","Finished permissionGranted");
     }
 
+    private void checkLocationService(){
+        settingsClient = new SettingsClient(context);
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(new LocationRequest().setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(10)
+                .setNumUpdates(2));
+        LocationSettingsRequest locationSettingsRequest = builder.build();
+        Task<LocationSettingsResponse> locationSettingsResponseTask = settingsClient.checkLocationSettings(locationSettingsRequest);
+        locationSettingsResponseTask.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            @RequiresPermission(anyOf = {Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION})
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                isLocationServiceOn = true;
+                Log.d("LOCATION_SERVICE", "Location service is on");
+                onLocationServiceOn();
+            }
+        });
+        locationSettingsResponseTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("LOCATION_SERVICE", "Location service is off");
+                isLocationServiceOn = false;
+            }
+        });
+    }
     public void permissionDenied(){
         isPermissionGranted = false;
     }
@@ -123,5 +158,9 @@ public class UserLocationManager{
     private void setLocation(double lat, double lon){
         this.latitude = lat;
         this.longitude = lon;
+    }
+
+    public boolean isLocationServiceOn() {
+        return isLocationServiceOn;
     }
 }
