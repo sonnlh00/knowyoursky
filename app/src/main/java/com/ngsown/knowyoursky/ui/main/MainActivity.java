@@ -32,17 +32,24 @@ import java.util.Observer;
 
 import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements MainContract.View {
-    TextView txtCity, txtTemperature, txtDescription, txtTimeUpdated, txtFeelsLike;
-    ImageView imgWeather;
-    ConstraintLayout layout;
+
+    @BindView(R.id.txtCity) TextView txtCity;
+    @BindView(R.id.txtTemperature) TextView txtTemperature;
+    @BindView(R.id.txtDescription) TextView txtDescription;
+    @BindView(R.id.txtTimeUpdated) TextView txtTimeUpdated;
+    @BindView(R.id.txtFeelsLike) TextView txtFeelsLike;
+    @BindView(R.id.imgWeather) ImageView imgWeather;
+    @BindView(R.id.layoutMain) ConstraintLayout layout;
+    @BindView(R.id.listHourly) RecyclerView hourlyRecyclerView;
 
     @Inject
     MainContract.Presenter presenter;
 
-    private RecyclerView hourlyRecyclerView;
     private HourlyAdapter hourlyAdapter;
-
     private ActivityComponent activityComponent;
 
     @Override
@@ -50,16 +57,16 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
         //region Initialize view
-        txtCity = findViewById(R.id.txtCity);
-        txtTemperature = findViewById(R.id.txtTemperature);
-        txtDescription = findViewById(R.id.txtDescription);
-        txtTimeUpdated = findViewById(R.id.txtTimeUpdated);
-        txtFeelsLike = findViewById(R.id.txtFeelsLike);
-        imgWeather = findViewById(R.id.imgWeather);
-        layout = findViewById(R.id.layoutMain);
-
-        hourlyRecyclerView = findViewById(R.id.listHourly);
+//        txtCity = findViewById(R.id.txtCity);
+//        txtTemperature = findViewById(R.id.txtTemperature);
+//        txtDescription = findViewById(R.id.txtDescription);
+//        txtTimeUpdated = findViewById(R.id.txtTimeUpdated);
+//        txtFeelsLike = findViewById(R.id.txtFeelsLike);
+//        imgWeather = findViewById(R.id.imgWeather);
+//        layout = findViewById(R.id.layoutMain);
+//        hourlyRecyclerView = findViewById(R.id.listHourly);
         hourlyAdapter = new HourlyAdapter(new ArrayList<HourlyForecast>(), this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         hourlyRecyclerView.setLayoutManager(layoutManager);

@@ -180,15 +180,6 @@ public class MainPresenter implements MainContract.Presenter {
     public void onLocationPermissionGranted() {
         userLocationManager.permissionGranted();
         loadForecast();
-//        threadExecutor.run(new Interactor() {
-//            @RequiresPermission(anyOf = {Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION})
-//            @Override
-//            public void run() {
-//                Log.d("PER_GRANTED","After calling per granted");
-//
-//            }
-//        });
-
     }
 
     @Override
