@@ -30,5 +30,9 @@ public interface MainContract {
         void hideNoInternetIcon();
         void showLocationOffIcon();
         void showLocationOnIcon();
+
+        void showShortLoadingAnimation();
+        void showLoadingAnimation();
+        void stopLoadingAnimation();
     }
 }

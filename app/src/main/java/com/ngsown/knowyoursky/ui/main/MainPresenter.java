@@ -52,7 +52,7 @@ public class MainPresenter implements MainContract.Presenter {
     public void loadForecast() {
         if (prefsHelper.hasCachedData()){
             Log.d(TAG, "Has cached data");
-            if (userLocationManager.isPermissionGranted() && networkChecking.isNetworkAvailable() && userLocationManager.isLocationServiceOn()){
+            if (location!= null && userLocationManager.isPermissionGranted() && networkChecking.isNetworkAvailable() && userLocationManager.isLocationServiceOn()){
                 loadCurrentForecast();
                 loadHourlyForecast();
             }
@@ -71,20 +71,24 @@ public class MainPresenter implements MainContract.Presenter {
             if (!userLocationManager.isPermissionGranted()) {
                 Log.d(TAG, "Error: No Permission!");
                 view.showNoLocationPermissionDialog();
+                view.stopLoadingAnimation();
             }
             else if (!networkChecking.isNetworkAvailable()) {
                 Log.d(TAG, "Error: No Internet");
+                view.stopLoadingAnimation();
             }
             else if (!userLocationManager.isLocationServiceOn()) {
                 Log.d(TAG, "Error: No Location Service");
+                view.stopLoadingAnimation();
             }
-            else{
+            else if (location!= null) {
                 loadCurrentForecast();
                 loadHourlyForecast();
             }
         }
     }
     private void loadCachedCurrentForecast() {
+        view.showShortLoadingAnimation();
         getWeatherForecast.getCachedCurrentForecast(new Observer<CurrentForecast>(){
             @Override
             public void onSubscribe(@NonNull Disposable d) {
@@ -93,7 +97,7 @@ public class MainPresenter implements MainContract.Presenter {
 
             @Override
             public void onNext(@NonNull CurrentForecast currentForecast) {
-                showCurrentForecast(currentForecast);
+                showCachedCurrentForecast(currentForecast);
                 Log.d("MainPresenter", "Current forecast observer: onNext");
             }
 
@@ -117,7 +121,7 @@ public class MainPresenter implements MainContract.Presenter {
 
             @Override
             public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
-                showHourlyForecast(hourlyForecasts);
+                showCachedHourlyForecast(hourlyForecasts);
             }
 
             @Override
@@ -133,70 +137,63 @@ public class MainPresenter implements MainContract.Presenter {
     }
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private void loadCurrentForecast(){
-        if (networkChecking.isNetworkAvailable()) {
-            getWeatherForecast.getCurrentForecast(location.getLatitude(), location.getLongitude(), apiKey,
-                    new Observer<CurrentForecast>(){
-                        @Override
-                        public void onSubscribe(@NonNull Disposable d) {
-                            compositeDisposable.add(d);
-                        }
+        getWeatherForecast.getCurrentForecast(location.getLatitude(), location.getLongitude(), apiKey,
+                new Observer<CurrentForecast>(){
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
 
-                        @Override
-                        public void onNext(@NonNull CurrentForecast currentForecast) {
-                            showCurrentForecast(currentForecast);
-                            Log.d("MainPresenter", "Current forecast observer: onNext");
-                        }
+                    @Override
+                    public void onNext(@NonNull CurrentForecast currentForecast) {
+                        showCurrentForecast(currentForecast);
+                        Log.d("MainPresenter", "Current forecast observer: onNext");
+                    }
 
-                        @Override
-                        public void onError(@NonNull Throwable e) {
+                    @Override
+                    public void onError(@NonNull Throwable e) {
 
-                        }
+                    }
 
-                        @Override
-                        public void onComplete() {
-                            Log.d("MainPresenter", "Current forecast observer: onComplete");
-                        }
-                    });
-        }
-        else {
-            loadCachedCurrentForecast();
-        }
+                    @Override
+                    public void onComplete() {
+                        Log.d("MainPresenter", "Current forecast observer: onComplete");
+                    }
+                });
     }
     
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private void loadHourlyForecast() {
-        if (networkChecking.isNetworkAvailable()) {
-            getWeatherForecast.getHourlyForecast(location.getLatitude(), location.getLongitude(), apiKey, new Observer<List<HourlyForecast>>() {
-                @Override
-                public void onSubscribe(@NonNull Disposable d) {
-                    compositeDisposable.add(d);
-                }
+        getWeatherForecast.getHourlyForecast(location.getLatitude(), location.getLongitude(), apiKey, new Observer<List<HourlyForecast>>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+                compositeDisposable.add(d);
+            }
 
-                @Override
-                public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
-                    showHourlyForecast(hourlyForecasts);
-                }
+            @Override
+            public void onNext(@NonNull List<HourlyForecast> hourlyForecasts) {
+                showHourlyForecast(hourlyForecasts);
+            }
 
-                @Override
-                public void onError(@NonNull Throwable e) {
+            @Override
+            public void onError(@NonNull Throwable e) {
 
-                }
+            }
 
-                @Override
-                public void onComplete() {
+            @Override
+            public void onComplete() {
 
-                }
-            });
-        }
-        else {
-            loadCachedHourlyForecast();
-        }
+            }
+        });
     }
     
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public void reloadForecast(){
         Log.d("MAIN_PRESENTER", "Reloading forecast");
-        onLocationPermissionGranted();
+        if (userLocationManager.isPermissionGranted())
+            onLocationPermissionGranted();
+        else
+            onLocationPermissionDenied();
     }
     
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -207,6 +204,7 @@ public class MainPresenter implements MainContract.Presenter {
             loadCachedHourlyForecast();
         }
         if (userLocationManager.isLocationServiceOn()){
+            view.showLoadingAnimation();
             view.showLocationOnIcon();
             userLocationManager.registerLocationObserver(new Observer<Location>() {
                 @Override
@@ -218,13 +216,9 @@ public class MainPresenter implements MainContract.Presenter {
                 @Override
                 public void onNext(@NonNull Location loc) {
                     Log.d(TAG, "OnNext: Receive location update");
-                    if (location == null) {
-                        location = loc;
-                        loadForecast();
-                    }
-                    else
-                        location = loc;
-
+                    location = loc;
+                    loadForecast();
+                    view.stopLoadingAnimation();
                 }
 
                 @Override
@@ -241,23 +235,39 @@ public class MainPresenter implements MainContract.Presenter {
         else {
             Log.d(TAG, "No location service");
             view.showLocationOffIcon();
+            view.stopLoadingAnimation();
         }
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     @Override
     public void onLocationPermissionDenied() {
-        loadForecast();
+        view.stopLoadingAnimation();
+        if (prefsHelper.hasCachedData())
+            loadForecast();
+        else
+            view.showNoLocationPermissionDialog();
     }
 
     private void showCurrentForecast(CurrentForecast currentForecast){
         view.showCurrentForecast(currentForecast);
+        Log.d(TAG, "Show new current forecast");
     }
     
     private void showHourlyForecast(List<HourlyForecast> hourlyForecasts){
         view.showHourlyForecast(hourlyForecasts);
     }
 
+    private void showCachedCurrentForecast(CurrentForecast currentForecast){
+        Log.d(TAG, "Show cached current forecast");
+        view.showCurrentForecast(currentForecast);
+    }
+
+    private void showCachedHourlyForecast(List<HourlyForecast> hourlyForecasts){
+        view.showHourlyForecast(hourlyForecasts);
+//        if (!userLocationManager.isLocationServiceOn())
+//            view.stopLoadingAnimation();
+    }
     @Override
     public void setView(MainContract.View view) {
         this.view = view;
@@ -266,6 +276,7 @@ public class MainPresenter implements MainContract.Presenter {
         @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     @Override
     public void initialize() {
+
         if (userLocationManager.isPermissionGranted()){
             onLocationPermissionGranted();
         }
@@ -319,7 +330,6 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     private void getCachedLocation(){
-        location.setLatitude(prefsHelper.getLatitude());
-        location.setLongitude(prefsHelper.getLongitude());
+        location = new Location(prefsHelper.getLatitude(), prefsHelper.getLongitude());
     }
 }

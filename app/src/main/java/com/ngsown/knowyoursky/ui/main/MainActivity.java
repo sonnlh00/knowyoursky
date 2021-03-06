@@ -1,6 +1,7 @@
 package com.ngsown.knowyoursky.ui.main;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -11,7 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +41,7 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity implements MainContract.View {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     @BindView(R.id.txtCity) TextView txtCity;
     @BindView(R.id.txtTemperature) TextView txtTemperature;
     @BindView(R.id.txtDescription) TextView txtDescription;
@@ -48,10 +54,11 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @BindView(R.id.imgLocation) ImageView imgLocation;
     @BindView(R.id.layoutMain) ConstraintLayout layout;
     @BindView(R.id.listHourly) RecyclerView hourlyRecyclerView;
-
+    @BindView(R.id.btnRefresh) ImageView imgRefresh;
     @Inject
     MainContract.Presenter presenter;
 
+    private RotateAnimation rotateAnimation;
     private HourlyAdapter hourlyAdapter;
     private ActivityComponent activityComponent;
 
@@ -65,12 +72,20 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         hourlyRecyclerView.setLayoutManager(layoutManager);
         hourlyRecyclerView.setAdapter(hourlyAdapter);
-        //endregion
 
+        rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+        rotateAnimation.setDuration(2000);
+        rotateAnimation.setInterpolator(new LinearInterpolator());
+        rotateAnimation.setRepeatCount(Animation.INFINITE);
+        //endregion
+        showLoadingAnimation();
         activityComponent = DaggerActivityComponent.builder().activityModule(new ActivityModule(this)).build();
         activityComponent.inject(this);
         presenter.setView(this);
         presenter.initialize();
+
+
     }
 
     @Override
@@ -135,7 +150,28 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     public void showLocationOnIcon() {
         imgLocation.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_location_on_24));
     }
+    @UiThread
+    @Override
+    public void showLoadingAnimation() {
+        Log.d(TAG, "Show loading animation");
+        imgRefresh.setAnimation(rotateAnimation);
+    }
 
+    @Override
+    public void stopLoadingAnimation() {
+        Log.d(TAG, "Stop loading animation");
+        imgRefresh.clearAnimation();
+    }
+    @Override
+    public void showShortLoadingAnimation(){
+        RotateAnimation rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+        rotateAnimation.setDuration(500);
+        rotateAnimation.setInterpolator(new LinearInterpolator());
+        rotateAnimation.setRepeatCount(1);
+        if (imgRefresh.getAnimation() != null)
+            imgRefresh.setAnimation(rotateAnimation);
+    }
     @Override
     public void showLocationOffIcon() {
         imgLocation.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_location_off_24));
