@@ -2,12 +2,14 @@ package com.ngsown.knowyoursky.ui.main;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -19,16 +21,13 @@ import com.ngsown.knowyoursky.di.component.DaggerActivityComponent;
 import com.ngsown.knowyoursky.di.module.ActivityModule;
 import com.ngsown.knowyoursky.ui.custom.CustomAlertDialog;
 import com.ngsown.knowyoursky.domain.UserLocationManager;
-import com.ngsown.knowyoursky.utils.NetworkChecking;
 import com.ngsown.knowyoursky.R;
 import com.ngsown.knowyoursky.adapters.HourlyAdapter;
 import com.ngsown.knowyoursky.domain.forecast.CurrentForecast;
 import com.ngsown.knowyoursky.domain.forecast.HourlyForecast;
-import com.ngsown.knowyoursky.utils.executor.ThreadExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observer;
 
 import javax.inject.Inject;
 
@@ -42,7 +41,11 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @BindView(R.id.txtDescription) TextView txtDescription;
     @BindView(R.id.txtTimeUpdated) TextView txtTimeUpdated;
     @BindView(R.id.txtFeelsLike) TextView txtFeelsLike;
+    @BindView(R.id.txtNoInternet) TextView txtNoInternet;
+    @BindView(R.id.txtNoLocationService) TextView txtNoLocationService;
     @BindView(R.id.imgWeather) ImageView imgWeather;
+    @BindView(R.id.imgInternet) ImageView imgInternet;
+    @BindView(R.id.imgLocation) ImageView imgLocation;
     @BindView(R.id.layoutMain) ConstraintLayout layout;
     @BindView(R.id.listHourly) RecyclerView hourlyRecyclerView;
 
@@ -56,17 +59,8 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         ButterKnife.bind(this);
-        //region Initialize view
-//        txtCity = findViewById(R.id.txtCity);
-//        txtTemperature = findViewById(R.id.txtTemperature);
-//        txtDescription = findViewById(R.id.txtDescription);
-//        txtTimeUpdated = findViewById(R.id.txtTimeUpdated);
-//        txtFeelsLike = findViewById(R.id.txtFeelsLike);
-//        imgWeather = findViewById(R.id.imgWeather);
-//        layout = findViewById(R.id.layoutMain);
-//        hourlyRecyclerView = findViewById(R.id.listHourly);
+
         hourlyAdapter = new HourlyAdapter(new ArrayList<HourlyForecast>(), this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         hourlyRecyclerView.setLayoutManager(layoutManager);
@@ -87,13 +81,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     public void onClickRefresh(View view) {
         Toast.makeText(this, "Refreshing...", Toast.LENGTH_SHORT).show();
-        new Thread(() -> presenter.reloadForecast()).start();
+        presenter.reloadForecast();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == UserLocationManager.CODE_LOCATION){
-            if (grantResults.length > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED || grantResults[1] == PackageManager.PERMISSION_GRANTED)){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 presenter.onLocationPermissionGranted();
             }
             else
@@ -121,15 +115,30 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     }
 
     @Override
-    public void showNoLocationPermissionError() {
+    public void showNoLocationPermissionDialog() {
         CustomAlertDialog locationError = new CustomAlertDialog("Location permission denied!");
         locationError.show(getSupportFragmentManager(), "Error");
     }
 
+
     @Override
-    public void showNoInternetError() {
-        CustomAlertDialog locationError = new CustomAlertDialog("No internet connection!");
-        locationError.show(getSupportFragmentManager(), "Error");
+    public void hideNoInternetIcon() {
+        imgInternet.setColorFilter(Color.WHITE);
+    }
+
+    @Override
+    public void showNoInternetIcon() {
+        imgInternet.clearColorFilter();
+    }
+
+    @Override
+    public void showLocationOnIcon() {
+        imgLocation.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_location_on_24));
+    }
+
+    @Override
+    public void showLocationOffIcon() {
+        imgLocation.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_location_off_24));
     }
 
     @Override
@@ -138,10 +147,24 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     }
 
     @Override
-    public void showLocationDetectedAlert() {
-        runOnUiThread(() -> {
-            CustomAlertDialog locationError = new CustomAlertDialog("Location detected, please refresh");
-            locationError.show(getSupportFragmentManager(), "Success");
-        });
+    public void hideNoLocationServiceText() {
+        txtNoLocationService.setVisibility(View.INVISIBLE);
     }
+
+    @Override
+    public void showNoLocationServiceText() {
+        runOnUiThread(() -> txtNoLocationService.setVisibility(View.VISIBLE));
+
+    }
+
+    @Override
+    public void hideNoInternetText() {
+        txtNoLocationService.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void showNoInternetText() {
+        txtNoInternet.setVisibility(View.VISIBLE);
+    }
+
 }

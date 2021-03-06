@@ -18,9 +18,17 @@ public interface MainContract {
     interface View extends BaseView {
         void showCurrentForecast(CurrentForecast currentForecast);
         void showHourlyForecast(List<HourlyForecast> hourlyForecasts);
-        void showNoLocationPermissionError();
-        void showNoInternetError();
+        void showNoLocationPermissionDialog();
+
+        void hideNoInternetText();
+        void showNoInternetText();
         void showLoadingLocationToast();
-        void showLocationDetectedAlert();
+        void hideNoLocationServiceText();
+        void showNoLocationServiceText();
+
+        void showNoInternetIcon();
+        void hideNoInternetIcon();
+        void showLocationOffIcon();
+        void showLocationOnIcon();
     }
 }

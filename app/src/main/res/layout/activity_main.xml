@@ -9,6 +9,19 @@
     tools:context=".ui.main.MainActivity">
 
     <TextView
+        android:id="@+id/txtTimeUpdated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text=""
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toStartOf="@+id/btnRefresh"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Last update at 00:00" />
+
+    <TextView
         android:id="@+id/txtTemperature"
         android:layout_width="0dp"
         android:layout_height="78dp"
@@ -32,7 +45,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtTemperature"
-        tools:text="Tinh Tay Ninh" />
+        tools:text="Mars" />
 
     <ImageView
         android:id="@+id/imgWeather"
@@ -59,20 +72,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtCity"
-        tools:text="Cloudy day" />
-
-    <TextView
-        android:id="@+id/txtTimeUpdated"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text=""
-        android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toStartOf="@+id/btnRefresh"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Last update at 00:00" />
+        tools:text="Unknown weather" />
 
     <ImageView
         android:id="@+id/btnRefresh"
@@ -122,4 +122,49 @@
         app:layout_constraintHorizontal_bias="0.48"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtFeelsLike" />
+
+    <ImageView
+        android:id="@+id/imgLocation"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_baseline_location_on_24" />
+
+    <ImageView
+        android:id="@+id/imgInternet"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="2dp"
+        app:layout_constraintEnd_toStartOf="@+id/imgLocation"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/icon_internet" />
+
+    <TextView
+        android:id="@+id/txtNoInternet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/no_location_service"
+        android:textColor="#FFFFFF"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/txtTemperature"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txtTemperature" />
+
+    <TextView
+        android:id="@+id/txtNoLocationService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/no_internet"
+        android:textColor="#FFFFFF"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtNoInternet" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

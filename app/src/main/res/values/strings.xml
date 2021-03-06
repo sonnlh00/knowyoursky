@@ -3,4 +3,6 @@
     <string name="last_update_time">Last updated at %s</string>
     <string name="feel_like_temp">Feels like %d\u2103</string>
     <string name="temperature">%d\u2103</string>
+    <string name="no_internet">No internet connection</string>
+    <string name="no_location_service">Please turn on location service</string>
 </resources>
