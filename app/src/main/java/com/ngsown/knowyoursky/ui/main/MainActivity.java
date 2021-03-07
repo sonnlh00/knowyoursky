@@ -55,12 +55,13 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @BindView(R.id.layoutMain) ConstraintLayout layout;
     @BindView(R.id.listHourly) RecyclerView hourlyRecyclerView;
     @BindView(R.id.btnRefresh) ImageView imgRefresh;
+
     @Inject
     MainContract.Presenter presenter;
-
     private RotateAnimation rotateAnimation;
     private HourlyAdapter hourlyAdapter;
     private ActivityComponent activityComponent;
+    private boolean isLongAnimation = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,24 +154,30 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     @UiThread
     @Override
     public void showLoadingAnimation() {
-        Log.d(TAG, "Show loading animation");
+        isLongAnimation = true;
+        Log.d(TAG, "Show long loading animation");
         imgRefresh.setAnimation(rotateAnimation);
     }
 
     @Override
     public void stopLoadingAnimation() {
-        Log.d(TAG, "Stop loading animation");
-        imgRefresh.clearAnimation();
+        Log.d(TAG, "Stop long loading animation");
+        if (isLongAnimation) {
+            imgRefresh.clearAnimation();
+            isLongAnimation = false;
+        }
     }
     @Override
     public void showShortLoadingAnimation(){
-        RotateAnimation rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-        rotateAnimation.setDuration(500);
-        rotateAnimation.setInterpolator(new LinearInterpolator());
-        rotateAnimation.setRepeatCount(1);
-        if (imgRefresh.getAnimation() != null)
+        if (!isLongAnimation) {
+            Log.d(TAG, "Show short loading animation");
+            RotateAnimation rotateAnimation = new RotateAnimation(0, 360, Animation.RELATIVE_TO_SELF, 0.5f,
+                    Animation.RELATIVE_TO_SELF, 0.5f);
+            rotateAnimation.setDuration(400);
+            rotateAnimation.setInterpolator(new LinearInterpolator());
+            rotateAnimation.setRepeatCount(1);
             imgRefresh.setAnimation(rotateAnimation);
+        }
     }
     @Override
     public void showLocationOffIcon() {

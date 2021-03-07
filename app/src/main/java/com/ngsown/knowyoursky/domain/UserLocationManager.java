@@ -32,21 +32,15 @@ public class UserLocationManager {
         this.locationManager = locationManager;
     }
     public void requestPermission(){
-        Log.d(TAG, "Request for permission");
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(context, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, CODE_LOCATION);
         }
     }
     public boolean isPermissionGranted() {
-        Log.d(TAG, "Check permission");
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
     public boolean isLocationServiceOn(){
-        Log.d(TAG, "Check location service");
         return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-    public void registerLocationServiceObserver(Observer<Boolean> observer){
-
     }
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     public void registerLocationObserver(Observer<Location> observer){
@@ -54,8 +48,8 @@ public class UserLocationManager {
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
             @Override
             public void onLocationChanged(@NonNull android.location.Location location) {
-                Log.d(TAG,"Location changes detected");
                 observable.onNext(new Location(location.getLatitude(), location.getLongitude()));
+                observable.onComplete();
                 locationManager.removeUpdates(this);
             }
 

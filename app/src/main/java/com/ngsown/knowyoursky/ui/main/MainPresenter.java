@@ -57,11 +57,14 @@ public class MainPresenter implements MainContract.Presenter {
                 loadHourlyForecast();
             }
             else if (networkChecking.isNetworkAvailable()){
+                Log.d(TAG, "Load new forecast from cached location and show animation");
+                view.showShortLoadingAnimation();
                 getCachedLocation();
                 loadCurrentForecast();
                 loadHourlyForecast();
             }
             else {
+                view.showShortLoadingAnimation();
                 loadCachedCurrentForecast();
                 loadCachedHourlyForecast();
             }
@@ -82,13 +85,13 @@ public class MainPresenter implements MainContract.Presenter {
                 view.stopLoadingAnimation();
             }
             else if (location!= null) {
+                // Animation is started at onLocationPermissionGranted
                 loadCurrentForecast();
                 loadHourlyForecast();
             }
         }
     }
     private void loadCachedCurrentForecast() {
-        view.showShortLoadingAnimation();
         getWeatherForecast.getCachedCurrentForecast(new Observer<CurrentForecast>(){
             @Override
             public void onSubscribe(@NonNull Disposable d) {
@@ -98,7 +101,6 @@ public class MainPresenter implements MainContract.Presenter {
             @Override
             public void onNext(@NonNull CurrentForecast currentForecast) {
                 showCachedCurrentForecast(currentForecast);
-                Log.d("MainPresenter", "Current forecast observer: onNext");
             }
 
             @Override
@@ -108,7 +110,6 @@ public class MainPresenter implements MainContract.Presenter {
 
             @Override
             public void onComplete() {
-                Log.d("MainPresenter", "Current forecast observer: onComplete");
             }
         });
     }
@@ -147,7 +148,6 @@ public class MainPresenter implements MainContract.Presenter {
                     @Override
                     public void onNext(@NonNull CurrentForecast currentForecast) {
                         showCurrentForecast(currentForecast);
-                        Log.d("MainPresenter", "Current forecast observer: onNext");
                     }
 
                     @Override
@@ -157,7 +157,6 @@ public class MainPresenter implements MainContract.Presenter {
 
                     @Override
                     public void onComplete() {
-                        Log.d("MainPresenter", "Current forecast observer: onComplete");
                     }
                 });
     }
@@ -209,7 +208,6 @@ public class MainPresenter implements MainContract.Presenter {
             userLocationManager.registerLocationObserver(new Observer<Location>() {
                 @Override
                 public void onSubscribe(@NonNull Disposable d) {
-                    Log.d(TAG, "OnSubscribe");
                     compositeDisposable.add(d);
                 }
                     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -218,7 +216,6 @@ public class MainPresenter implements MainContract.Presenter {
                     Log.d(TAG, "OnNext: Receive location update");
                     location = loc;
                     loadForecast();
-                    view.stopLoadingAnimation();
                 }
 
                 @Override
@@ -237,6 +234,7 @@ public class MainPresenter implements MainContract.Presenter {
             view.showLocationOffIcon();
             view.stopLoadingAnimation();
         }
+        loadForecast();
     }
 
     @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -256,6 +254,7 @@ public class MainPresenter implements MainContract.Presenter {
     
     private void showHourlyForecast(List<HourlyForecast> hourlyForecasts){
         view.showHourlyForecast(hourlyForecasts);
+        view.stopLoadingAnimation();
     }
 
     private void showCachedCurrentForecast(CurrentForecast currentForecast){
@@ -273,7 +272,7 @@ public class MainPresenter implements MainContract.Presenter {
         this.view = view;
     }
 
-        @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     @Override
     public void initialize() {
 
@@ -288,13 +287,13 @@ public class MainPresenter implements MainContract.Presenter {
             public void onSubscribe(@NonNull Disposable d) {
                 compositeDisposable.add(d);
             }
-
+            @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
             @Override
             public void onNext(@NonNull Boolean isInternetAvailable) {
                 Log.d(TAG, "Network: " + isInternetAvailable);
                 if (isInternetAvailable) {
-                    view.hideNoInternetText();
                     view.hideNoInternetIcon();
+                    loadForecast();
                 }
                 else {
                     view.showNoInternetIcon();
@@ -331,5 +330,6 @@ public class MainPresenter implements MainContract.Presenter {
 
     private void getCachedLocation(){
         location = new Location(prefsHelper.getLatitude(), prefsHelper.getLongitude());
+        Log.d(TAG, String.format("Get cached location: lat: %f lon: %f", location.getLatitude(), location.getLongitude()));
     }
 }

@@ -7,12 +7,13 @@
     android:layout_height="match_parent"
     android:background="@drawable/night_background"
     tools:context=".ui.main.MainActivity">
+
     <TextView
         android:id="@+id/txtTimeUpdated"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text=""
+        android:text="Last update at 00:00"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toStartOf="@+id/btnRefresh"
         app:layout_constraintHorizontal_bias="1.0"
@@ -25,7 +26,7 @@
         android:layout_width="0dp"
         android:layout_height="78dp"
         android:layout_marginTop="2dp"
-        android:text=""
+        android:text="56\u2103"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
         android:textSize="64sp"
@@ -39,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text=""
+        android:text="Mars"
         android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -71,7 +72,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtCity"
-        tools:text="Unknown weather" />
+        tools:text="Can't fetch weather info" />
 
     <ImageView
         android:id="@+id/btnRefresh"
@@ -88,7 +89,7 @@
         android:id="@+id/txtFeelsLike"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
+        android:text="Feels like 54\u2103"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
